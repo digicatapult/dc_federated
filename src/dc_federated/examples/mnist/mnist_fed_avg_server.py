@@ -1,8 +1,10 @@
+#!/usr/bin/env python
 """
 Simple runner to start FedAvgServer server for the MNIST dataset.
 """
 import argparse
 import sys
+from os import environ
 
 from dc_federated.algorithms.fed_avg.fed_avg_server import FedAvgServer
 from dc_federated.examples.mnist.mnist_fed_model import MNISTModelTrainer, MNISTSubSet
@@ -39,10 +41,10 @@ def get_args():
                    required=False,
                    default=None)
     p.add_argument("--server-port",
-                   help="The port at which the server listens.",
-                   type=int,
-                   required=False,
-                   default=8080)
+                   help="The port of the host of server",
+                   default=environ.get('SERVER_PORT'),
+                   type=str,
+                   required=False)
 
     args, rest = p.parse_known_args()
 
@@ -67,11 +69,11 @@ def run():
         test_loader=MNISTSubSet.default_dataset(is_train=False).get_data_loader()
     )
 
-    fed_avg_server = FedAvgServer(global_model_trainer=global_model_trainer,
+    fed_avg_server = FedAvgServer(server_port=args.server_port,
+                                  global_model_trainer=global_model_trainer,
                                   key_list_file=args.key_list_file,
                                   update_lim=3,
                                   server_host_ip=args.server_host_ip,
-                                  server_port=args.server_port,
                                   ssl_enabled=args.ssl_enabled,
                                   ssl_keyfile=args.ssl_keyfile,
                                   ssl_certfile=args.ssl_certfile)
