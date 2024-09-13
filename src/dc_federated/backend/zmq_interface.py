@@ -88,6 +88,7 @@ class ZMQInterfaceServer(object):
         self.port = port
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.DEALER)
+        print(f"connecting to " + f"tcp://localhost:{self.port}")
         self.socket.connect(f"tcp://localhost:{self.port}")
 
     def server_args_request_send(self):
@@ -105,9 +106,12 @@ class ZMQInterfaceServer(object):
             ssl_keyfile, ssl_certfile, model_check_interval, debug
         """
         #  socket = self._send([b"server_args_request"])
-        self.socket.send_multipart([b"server_args_request"])
-        output = self.socket.recv_pyobj()
-        return output
+        # self.socket.send_multipart([b"server_args_request"])
+        self.socket.send_pyobj("hello")
+
+        print("Sent")
+        # output = self.socket.recv_pyobj()
+        # return output
 
     def register_worker_send(self, worker_id):
         """

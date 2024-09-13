@@ -726,6 +726,7 @@ class DCFServerHandler(object):
 
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.ROUTER)
+        print(f"binding to " + f"tcp://*:{self.socket_port}")
         self.socket.bind(f"tcp://*:{self.socket_port}")
 
     def start_server(self):
@@ -740,19 +741,24 @@ class DCFServerHandler(object):
         command = " ".join(["python", subprocess_file, str(self.socket_port)])
         sp.Popen(command, stdout=sys.stdout, stderr=sys.stderr, shell=True)
         
-        self.wait_for_messages()
+        self.run()
 
     def run(self):
         """
         Runs the main loop of the DCFServerHandler.
         """
+        print(self.socket.send())
+        if True: 
+            return
+        
         poller = zmq.Poller()
         poller.register(self.socket, zmq.POLLIN)
-
+        print("starting listening")
         while True:
             socks = dict(poller.poll())
-
+            print("something!")
             if self.socket in socks:
+                print("handling")
                 self.handle_received_message(self.socket.recv_multipart())
             else:
                 raise LookupError(f"Unknown socket detected by zmq poller {self.socket}.")
@@ -793,6 +799,3 @@ class DCFServerHandler(object):
             logger.error(
                 f'ZQM messaging interface received unrecognised message type: "{message[0]}"'
             )
-
-    def __del__(self):
-        self.context.term()
